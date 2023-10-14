@@ -2,6 +2,7 @@ package com.sonercoskun.isyatirimmalitablolar.controller;
 
 import com.sonercoskun.isyatirimmalitablolar.entity.HisseOptions;
 import com.sonercoskun.isyatirimmalitablolar.models.dto.HisseOptionsDTO;
+import com.sonercoskun.isyatirimmalitablolar.models.dto.TableParametersDTO;
 import com.sonercoskun.isyatirimmalitablolar.service.HisseService;
 import com.sonercoskun.isyatirimmalitablolar.service.MaliTabloService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,9 +31,14 @@ public class UserFeedController {
           return hisseOptionsDTO.convertor(hisseService.getHisseOptionsList());
     }
 
-    //TODO  Grafiklere basılacak data gönderilecek
-    // param  Yıl, dönem, dönen varlıklar, kısa vadeli yabancı kaynaklar, özkaynaklar, gelir tablosu(net kar)
-    //TODO
-    //TODO
-    //TODO
+    // TODO  Grafiklere basılacak data gönderilecek
+    public TableParametersDTO getTableParameters(){
+        TableParametersDTO tableParametersDTO = new TableParametersDTO();
+
+
+
+
+
+        return tableParametersDTO;
+    }
 }

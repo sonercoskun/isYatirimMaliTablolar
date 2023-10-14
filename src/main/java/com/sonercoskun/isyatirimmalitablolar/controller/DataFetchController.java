@@ -76,6 +76,7 @@ public class DataFetchController {
         }catch (Exception exception) {
             return ResponseEntity.badRequest().build();
         }
+        System.out.println("success");
         return ResponseEntity.ok().build();
     }
 }

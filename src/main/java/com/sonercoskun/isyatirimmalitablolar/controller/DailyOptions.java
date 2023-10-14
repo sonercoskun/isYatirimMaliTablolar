@@ -23,40 +23,44 @@ public class DailyOptions {
     private RestTemplate restTemplate;
     private DailyPricesRepository dailyPricesRepository;
     private HisseService hisseService;
-    public DailyOptions(DailyPricesRepository dailyPricesRepository,HisseService hisseService){
+
+    public DailyOptions(DailyPricesRepository dailyPricesRepository, HisseService hisseService) {
         this.restTemplate = new RestTemplate();
         this.dailyPricesRepository = dailyPricesRepository;
         this.hisseService = hisseService;
     }
-    @GetMapping
-    public ResponseEntity<?> getAllDailyOptions(){
-        //List<Hisse> hisses = hisseService.fetchAllShares();
+
+    @GetMapping("/dailyOptions")
+    public ResponseEntity<?> getAllDailyOptions() {
+        List<Hisse> hisses = hisseService.fetchAllShares();
         int yearFrom = 1990;
         int yearTo = 1995;
-        //for(Hisse hisse : hisses){
-        while(yearFrom != 2026) {
-            ResponseEntity<DailyPricesDTO> responseEntity = restTemplate.getForEntity
-                    ("https://www.isyatirim.com.tr/_Layouts/15/IsYatirim.Website/Common/ChartData.aspx/IndexHistoricalAll" +
-                            "?period=1440&from=" + yearFrom + "0101000000&to=" + yearTo + "1231235959&endeks=" +
-                            "KCHOL.E.BIST", DailyPricesDTO.class);
-            if (responseEntity.getBody() == null || responseEntity.getBody().getData() == null) {
-                return new ResponseEntity<>(null, HttpStatus.OK);
+        for (Hisse hisse : hisses) {
+            while (yearFrom != 2026) {
+                ResponseEntity<DailyPricesDTO> responseEntity = restTemplate.getForEntity
+                        ("https://www.isyatirim.com.tr/_Layouts/15/IsYatirim.Website/Common/ChartData.aspx/IndexHistoricalAll" +
+                                "?period=1440&from=" + yearFrom + "0101000000&to=" + yearTo + "1231235959&endeks=" +
+                                hisse.getHisse() + ".E.BIST", DailyPricesDTO.class);
+                if (responseEntity.getBody() == null || responseEntity.getBody().getData() == null) {
+                    return new ResponseEntity<>(null, HttpStatus.OK);
+                }
+                List<DailyPrices> dailyPricesList = getDailyPrices(responseEntity,hisse.getHisse());
+                dailyPricesRepository.saveAll(dailyPricesList);
+                yearFrom = yearFrom + 6;
+                yearTo = yearTo + 6;
             }
-            List<DailyPrices> dailyPricesList = getDailyPrices(responseEntity);
-            dailyPricesRepository.saveAll(dailyPricesList);
-            yearFrom = yearFrom + 6;
-            yearTo = yearTo + 6;
+            yearFrom = 1990;
+            yearTo = 1995;
         }
-        //}
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private static List<DailyPrices> getDailyPrices(ResponseEntity<DailyPricesDTO> responseEntity) {
+    private static List<DailyPrices> getDailyPrices(ResponseEntity<DailyPricesDTO> responseEntity, String hisse) {
         List<DailyPrices> dailyPricesList = new ArrayList<>();
-        for(PricesDTO pricesDTO : responseEntity.getBody().getData()){
+        for (PricesDTO pricesDTO : responseEntity.getBody().getData()) {
             DailyPrices dailyPrices = new DailyPrices();
             DailyPricesEmbeddedId dailyPricesEmbeddedId = new DailyPricesEmbeddedId();
-            dailyPricesEmbeddedId.setOptionName("KCHOL");
+            dailyPricesEmbeddedId.setOptionName(hisse);
             dailyPricesEmbeddedId.setId(pricesDTO.getTimestamp());
             dailyPrices.setDailyPricesEmbeddedId(dailyPricesEmbeddedId);
             dailyPrices.setPrice(pricesDTO.getPrice());
